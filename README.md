@@ -9,3 +9,8 @@ Winboard allows to draw on top of other applications
 
 ## Usage Example
 ![Usage Example Picture](./example.png)
+
+
+## Uninstalling
+To uninstall you can remove the following folder from your system
+`C:\Users\<YOUR_USER>\AppData\Local\winboard`
