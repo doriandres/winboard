@@ -103,6 +103,7 @@
         width: 100%;
         height: 100%;
         background-color: transparent;
+        cursor: crosshair;
       }
     </style>
   </head>
@@ -110,16 +111,16 @@
     <main>
       <div id="title-bar">
         <div id="title">
-          <button id="pen-btn" disabled>Pen</button>
-          <button id="eraser-btn">Eraser</button>
-          <input id="color-input" type="color" value="#FF0000" />
-          <input id="stroke-input" type="range" min="1" max="100" value="3" />
-          <button id="clear-btn">Clear All</button>
+          <button id="pen-btn" title="Enter pen mode" disabled>Pen</button>
+          <button id="eraser-btn" title="Enter eraser mode">Eraser</button>
+          <input id="color-input" type="color" title="Select pen color" value="#FF0000" />
+          <input id="stroke-input" type="range" min="1" max="10" value="1" title="Select pen or eraser width" />
+          <button id="clear-btn" title="Clear all canvas content">Clear All</button>
         </div>
         <div id="title-bar-btns">
-          <button id="min-btn">&minus;</button>
-          <button id="max-btn">&plus;</button>
-          <button id="close-btn">&times;</button>
+          <button id="min-btn" title="Minimize window">&minus;</button>
+          <button id="max-btn" title="Maximize window">&plus;</button>
+          <button id="close-btn" title="Close window">&times;</button>
         </div>
       </div>
       <canvas id="canvas"></canvas>
@@ -145,7 +146,7 @@
         const yOffset = 35;
 
         let DRAW_COLOR = "#FF0000";
-        let DRAW_THICKNESS = 3;
+        let DRAW_THICKNESS = 1;
 
         document
           .querySelector("#color-input")
@@ -166,6 +167,7 @@
 
         ctx.canvas.width = document.documentElement.clientWidth;
         ctx.canvas.height = document.documentElement.clientHeight - yOffset;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
         ctx.beginPath();
         ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -175,7 +177,9 @@
         document
           .querySelector("#clear-btn")
           .addEventListener("click", (event) => {
-            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            if(window.confirm("Are you sure you want to clear the canvas?")){
+              ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            }            
           });
 
         window.addEventListener("resize", () => {
@@ -191,6 +195,7 @@
 
           ctx.canvas.width = w;
           ctx.canvas.height = h;
+          ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
           ctx.putImageData(img, 0, 0);
         });
@@ -215,40 +220,53 @@
             event.target.disabled = true;
           });
 
-        canvas.addEventListener("mousedown", (event) => {
-          if (isDrawing || event.button !== 0) return;
+        let lastX = 0;
+        let lastY = 0;
 
-          const x = event.pageX;
-          const y = event.pageY - yOffset;
+        function handleStart(event) {
+          if (isDrawing) return;
+          lastX = event.pageX;
+          lastY = event.pageY - yOffset;
           ctx.beginPath();
           isDrawing = true;
-          ctx.moveTo(x, y);
-        });
+        }
 
-        document.addEventListener("mousemove", (event) => {
+        canvas.addEventListener("touchstart", handleStart);
+        canvas.addEventListener("mousedown", handleStart);
+
+        function handleMove(event) {
           if (!isDrawing) return;
-          requestAnimationFrame(() => {
-            const x = event.pageX;
-            const y = event.pageY - yOffset;
+          const x = event.pageX;
+          const y = event.pageY - yOffset;
 
-            const isErasing = !isPen;
+          const isErasing = !isPen;
 
-            if (isErasing) {
-              ctx.globalCompositeOperation = "destination-out";
-            } else {
-              ctx.globalCompositeOperation = "source-over";
-            }
+          if (isErasing) {
+            ctx.globalCompositeOperation = "destination-out";
+          } else {
+            ctx.globalCompositeOperation = "source-over";
+          }
 
-            ctx.strokeStyle = DRAW_COLOR;
-            ctx.lineWidth = DRAW_THICKNESS;
-            ctx.lineTo(x, y);
-            ctx.stroke();
-          });
-        });
+          ctx.filter = "blur(1px)";
+          ctx.strokeStyle = DRAW_COLOR;
+          ctx.lineWidth = DRAW_THICKNESS;
+          ctx.lineCap = "round";
+          ctx.moveTo(lastX, lastY);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+          lastX = x;
+          lastY = y;
+        }
 
-        document.addEventListener("mouseup", () => {
+        document.addEventListener("touchmove", handleMove);
+        document.addEventListener("mousemove", handleMove);
+
+        function handleEnd() {
           isDrawing = false;
-        });
+        }
+
+        document.addEventListener("mouseup", handleEnd);
+        document.addEventListener("touchend", handleEnd);
       })();
     </script>
   </body>
