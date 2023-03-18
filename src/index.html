@@ -237,7 +237,7 @@
         function handleMove(event) {
           if (!isDrawing) return;
           const x = event.pageX;
-          const y = event.pageY - yOffset;
+          const y = event.pageY - yOffset - 10;
 
           const isErasing = !isPen;
 
