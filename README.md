@@ -4,7 +4,7 @@
 Winboard allows to draw on top of other applications
 
 ## Downloads
-- [Download v0.2.0 Windows x64 installer](https://github.com/doriandres/winboard/releases/download/v0.2.0/Winboard-0.2.0-installer.exe)
+- [Download v0.3.0 Windows x64 installer](https://github.com/doriandres/winboard/releases/download/v0.3.0/Winboard-0.3.0.Installer.zip)
 
 
 ## Usage Example
